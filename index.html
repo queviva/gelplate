@@ -1,0 +1,253 @@
+<html>
+<head><title>gel plate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link id="luckiestFont" href="https://fonts.google
+apis.com/css?family=Luckiest+Guy" rel="stylesheet">
+<style>
+
+* {
+    box-sizing: border-box;
+    word-wrap: break-word;
+    --color: hsl(43, 100%, 47%);
+    --backcolor: #000;/*hsl(120, 100%, 13%);*/
+    --gelWidth: 40px;
+    --gelHeight: 220px;
+    --gelColor: hsl(265, 80%, 41%);
+    --dnaColor: hsl(338, 100%, 74%);
+    --grad: radial-gradient(ellipse at center, rgba(255,249,229,0.93) 0%,rgba(255,249,229,0.92) 32%,rgba(255,122,171,0.89) 100%);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+    padding: 0px;
+    margin: 0px;
+    hyphens: auto;
+}
+
+#holder {
+    padding: 10px;
+    font-size: 24px;
+    text-align: justify;
+    max-width: 700px;
+    margin: auto;
+    background-color: var(--backcolor);
+    color: var(--color);
+}
+
+.migDiv {
+    padding: 10px;
+    text-align: center;
+}
+
+div {
+    position: relative;
+    padding: 10px;
+}
+
+img {
+    width: 100%;
+    max-width: 400px;
+}
+
+img.fullus {
+    max-width: 100%;
+}
+
+a, a:visited {
+    color: var(--color);
+    text-decoration: none;
+    transition: 300ms linear color;
+}
+
+a:hover {
+    color: #e86;
+    transition: 300ms linear color;
+}
+
+.transMig {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    max-width: 100%;
+}
+
+input {
+    --thumbH : 30px;
+    --color: 48, 100%;
+    --lightness: 88%;
+    --midness:  var(--lightness);/*calc(0.37 * var(--lightness));*/
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    display: inline-block;
+    margin: 0;
+    height: var(--thumbH);
+    width: 80%;
+    border-radius: calc(var(--thumbH) / 2);
+    background-color: hsla(0,100%,100%,0.3);
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: hsl(var(--color), var(--lightness));
+    opacity: 1.7;
+    height: var(--thumbH);
+    margin-bottom: 0px;
+    width: var(--thumbH);
+    border: calc(0.1 * var(--thumbH)) solid;
+    border-color: var(--backcolor);
+    border-radius: calc(var(--thumbH) / 2);
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+.center {
+    background-color: #ea0;
+    color: #fff;
+    text-align: center;
+    font-family: 'luckiest guy';
+    font-size: 10px;
+    padding: 2px;
+}
+
+#gelspace {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 200px;
+    box-sizing: border-box;
+    color: rgba(255,255,255,0.5);
+}
+
+.gel {
+    background-color: var(--gelColor);
+    width: 55px;
+    height: 250px;
+    padding: 1px;
+    margin: 0px;
+    float: left;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.gel:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.band {
+    position: absolute;
+    color: white;
+    background: var(--grad);
+    background-size: cover;
+    border-radius: 1px;
+    transition: all linear 0.5s;
+    box-sizing: border-box;
+    width: calc(100% - 1px);
+    height: 20px;
+    padding: 0;
+    margin: 0px;
+}
+
+.band-start {
+    transition: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+</style>
+</head>
+
+<body>
+<div id="holder">
+    <div class="center"> gel plated </div>
+    
+    <div id="gelspace">
+        <div id="gel" class="gel"></div>
+        <div class="gel"></div>
+        <div class="gel"></div>
+    </div>
+    
+    <div style="text-align:right;width:100%">
+        <i>~queviva</i>
+    </div>
+    
+</div>
+</body>
+
+<script>
+
+new (function (){
+    
+    const prefs = {
+        numBands : 5
+    };
+    
+    // get refs
+    let gel = document.getElementById('gel');
+    
+    let gelH = parseInt(
+        window.getComputedStyle(document.documentElement)
+        .getPropertyValue('--gelHeight'),
+        10
+    );
+    
+    // on load, create a few bands
+    let bands = [];//[...Array(prefs.numBand).keys()];
+    
+    for(let i = 0; i < prefs.numBands; i++) {
+        
+        let tmpDiv = document.createElement('div');
+        tmpDiv.className = 'band';
+        bands[i] = tmpDiv;
+        gel.appendChild(bands[i]);
+    }
+    
+    const reset = () => {
+        
+        bands.forEach(ban => {
+            
+            ban.className = 'band-start';
+            ban.style.height = '0px';
+            ban.style.top = '0px';
+            ban.style.opacity = 0.1;
+            setTimeout(scatter, 250);
+            
+        });
+        
+    };
+    
+    const scatter = () => {
+        
+        bands.forEach(ban => {
+            
+            let h = (2 + Math.random() * 40);
+            
+            ban.className = 'band';
+            ban.style.height = h + 'px';
+            ban.style.top = Math.random() * (gelH - h) + 'px';
+            ban.style.opacity = Math.random();
+            
+        });
+        
+    };
+    
+    reset();
+    
+    gel.addEventListener('click', reset);
+        
+})();
+    
+</script>
+</html>
