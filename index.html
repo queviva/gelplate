@@ -1,4 +1,5 @@
 <html>
+
 <head><title>gel plate</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link id="luckiestFont" href="https://fonts.google
@@ -10,11 +11,20 @@ apis.com/css?family=Luckiest+Guy" rel="stylesheet">
     word-wrap: break-word;
     --color: hsl(43, 100%, 47%);
     --backcolor: #000;/*hsl(120, 100%, 13%);*/
-    --gelWidth: 40px;
-    --gelHeight: 220px;
-    --gelColor: hsl(265, 80%, 41%);
-    --dnaColor: hsl(338, 100%, 74%);
-    --grad: radial-gradient(ellipse at center, rgba(255,249,229,0.93) 0%,rgba(255,249,229,0.92) 32%,rgba(255,122,171,0.89) 100%);
+    --gelwidth: 40px;
+    --gelheight: 220px;
+    --gelcolor: hsl(265, 80%, 41%);
+    --dnacolor0: rgba(255,249,229,0.1);
+    --dnacolor1: rgba(255,122,171,0.5);
+    --dnacolor2: rgba(255,122,171,0.98);
+    --gradval = 50% 0%;
+    --grad: radial-gradient(
+        ellipse at 50% 0%,
+        var(--dnacolor0) 0%,
+        var(--dnacolor0) 15%,
+        var(--dnacolor1) 63%,
+        var(--dnacolor2) 100%
+      );
 }
 
 *, *::before, *::after {
@@ -129,10 +139,10 @@ input[type=range]:focus {
 }
 
 .gel {
-    background-color: var(--gelColor);
+    background-color: var(--gelcolor);
     width: 55px;
     height: 250px;
-    padding: 1px;
+    padding: 2px;
     margin: 0px;
     float: left;
     text-align: center;
@@ -150,21 +160,31 @@ input[type=range]:focus {
     color: white;
     background: var(--grad);
     background-size: cover;
-    border-radius: 1px;
+    border-radius: 0 0 40% 40%;
     transition: all linear 0.5s;
     box-sizing: border-box;
-    width: calc(100% - 1px);
+    width: calc(100% - 4px);
     height: 20px;
     padding: 0;
     margin: 0px;
 }
 
 .band-start {
-    transition: none;
-    width: 100%;
+    position: absolute;
+    transition: all linear 0s;
+    width: calc(100% - 2px);
     box-sizing: border-box;
+    height: 0px;
+    top: 0px;
 }
 
+.band-err {
+    position: absolute;
+    border-radius: 2px;
+	background-color: var(--dnacolor2);
+    width: calc(100% - 2px);
+    transition: all linear 0.5s;
+}
 
 </style>
 </head>
@@ -174,7 +194,7 @@ input[type=range]:focus {
     <div class="center"> gel plated </div>
     
     <div id="gelspace">
-        <div id="gel" class="gel"></div>
+        <div id="gel0" class="gel"></div>
         <div class="gel"></div>
         <div class="gel"></div>
     </div>
@@ -188,66 +208,158 @@ input[type=range]:focus {
 
 <script>
 
-new (function (){
-    
+new(function() {
+
+    // set preferences {
     const prefs = {
-        numBands : 5
+        numBands: 5,
+        err: {
+            h: 2, // height of band
+            t: 1, // top coord of band
+            o: 0.05, // opacity of band
+            smear: 100 // 1-in-# bands that smear
+        }
     };
-    
-    // get refs
-    let gel = document.getElementById('gel');
-    
-    let gelH = parseInt(
+    //}
+
+    // get references {
+    const gels = document.querySelectorAll('#gelspace > .gel');
+
+    const gelH = parseInt(
         window.getComputedStyle(document.documentElement)
-        .getPropertyValue('--gelHeight'),
+        .getPropertyValue('--gelheight'),
         10
     );
-    
-    // on load, create a few bands
-    let bands = [];//[...Array(prefs.numBand).keys()];
-    
-    for(let i = 0; i < prefs.numBands; i++) {
-        
-        let tmpDiv = document.createElement('div');
-        tmpDiv.className = 'band';
-        bands[i] = tmpDiv;
-        gel.appendChild(bands[i]);
-    }
-    
-    const reset = () => {
-        
-        bands.forEach(ban => {
-            
-            ban.className = 'band-start';
-            ban.style.height = '0px';
-            ban.style.top = '0px';
-            ban.style.opacity = 0.1;
-            setTimeout(scatter, 250);
-            
-        });
-        
-    };
-    
+    //}
+
+    // create the bands {
+    gels.forEach(gel => {
+
+        let bands = []; //[...Array(prefs.numBand).keys()];
+
+        for (let i = 0; i < prefs.numBands; i++) {
+
+            let tmpDiv = document.createElement('div');
+            tmpDiv.className = 'band';
+            bands[i] = tmpDiv;
+            gel.appendChild(bands[i]);
+
+        }
+
+        gel.addEventListener('click', e => reset());
+
+    });
+    //}
+
+    // scatter the bands {
     const scatter = () => {
-        
-        bands.forEach(ban => {
-            
-            let h = (2 + Math.random() * 40);
-            
-            ban.className = 'band';
-            ban.style.height = h + 'px';
-            ban.style.top = Math.random() * (gelH - h) + 'px';
-            ban.style.opacity = Math.random();
-            
+
+        // holder for the values
+        let vals = { h: [], t: [], o: [] };
+
+        // loop through all the children
+        for (ban of gels[0].children) {
+
+            // generate random vals
+            let h = 2 + Math.random() * 22;
+            vals.h.push(h);
+            vals.t.push(Math.random() * (gelH - h)); + 'px';
+            vals.o.push(Math.random() + 0.05);
+
+        }
+
+        // loop through all the gels
+        gels.forEach(gel => {
+
+            // loop through every band in the gel
+            for (let i = 0; i < gel.children.length; i++) {
+
+                let ban = gel.children[i];
+
+                // smear the band if errored {
+                if (
+                    Math.random() * prefs.err.smear >
+                    prefs.err.smear - 1
+                ) {
+
+                    ban.className = 'band-err';
+
+                    Object.assign(
+                        ban.style, {
+                            height: gelH * 0.98 + 'px',
+                            top: Math.random() * 10 + 'px',
+                            opacity: Math.random() * 0.2
+                        }
+                    )
+
+                }
+                //}
+
+
+                // otherwise place the band {
+                else {
+
+                    ban.className = 'band';
+
+                    // set vals +/- error {
+                    Object.assign(
+                        ban.style, {
+                            height:
+                                (-prefs.err.h + Math.random() * 2 * prefs.err.h) +
+                                vals.h[i] + 'px',
+
+                            top:
+                                (-prefs.err.t + Math.random() * 2 * prefs.err.t) +
+                                vals.t[i] + 'px',
+
+                            opacity:
+                                (-prefs.err.o + Math.random() * 2 * prefs.err.o) +
+                                vals.o[i]
+                        }
+
+                    );
+                    //}
+
+                }
+                //}
+
+            }
+
         });
-        
+
     };
-    
+    //}
+
+    // resets the bands {
+    const reset = () => {
+
+        gels.forEach(gel => {
+
+            for (ban of gel.children) {
+
+                ban.className = 'band-start';
+                Object.assign(
+                    ban.style, {
+                        height: '0px',
+                        top: '0px',
+                        opacity: 0.1
+                    }
+                );
+
+            }
+
+        });
+
+        setTimeout(scatter, 250);
+
+    };
+    //}
+
+    // call reset on load
     reset();
-    
-    gel.addEventListener('click', reset);
-        
+
 })();
     
 </script>
+
 </html>
