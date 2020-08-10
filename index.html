@@ -11,14 +11,16 @@ apis.com/css?family=Luckiest+Guy" rel="stylesheet">
     word-wrap: break-word;
     --color: hsl(43, 100%, 47%);
     --backcolor: #000;/*hsl(120, 100%, 13%);*/
+    --runtime: 3.5s;
+    --heighttime: calc(0.1 * var(--runtime));
     --gelwidth: 40px;
     --gelheight: 220px;
     --gelcolor: hsl(265, 80%, 41%);
     --dnacolor0: rgba(255,249,229,0.1);
     --dnacolor1: rgba(255,122,171,0.5);
     --dnacolor2: rgba(255,122,171,0.98);
-    --gradval = 50% 0%;
-    --grad: radial-gradient(
+    --grad : url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewbox='100 100' width='100' height='100'><defs><filter id='f1' x='0' y='0'><feGaussianBlur in='SourceGraphic' stdDeviation='13' /></filter></defs><path fill='rgba(255,122,171,0.98)' filter='url(%23f1)' d='M0 0C12 50 25 10 40 20C75 0 88 50 100 0  C 104 135 75 85 70 85 C 25 85 -4 135 0 0 Z' width='100%' height='100%'/></svg>");
+    --xxxgrad: radial-gradient(
         ellipse at 50% 0%,
         var(--dnacolor0) 0%,
         var(--dnacolor0) 15%,
@@ -38,6 +40,7 @@ body {
 }
 
 #holder {
+    position: relative;
     padding: 10px;
     font-size: 24px;
     text-align: justify;
@@ -133,14 +136,15 @@ input[type=range]:focus {
     justify-content: space-between;
     margin: 0 auto;
     width: 100%;
-    max-width: 200px;
     box-sizing: border-box;
     color: rgba(255,255,255,0.5);
+    xxxborder: 1px solid #c30;
 }
 
 .gel {
     background-color: var(--gelcolor);
-    width: 55px;
+    max-width: 55px;
+    width: calc(100%/7);
     height: 250px;
     padding: 2px;
     margin: 0px;
@@ -156,12 +160,18 @@ input[type=range]:focus {
 }
 
 .band {
+    overflow: hidden;
     position: absolute;
     color: white;
-    background: var(--grad);
-    background-size: cover;
-    border-radius: 0 0 40% 40%;
-    transition: all linear 0.5s;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    xxxbackground: var(--grad);
+    xxbackground-size: 100% 100%;
+    xxborder-radius: 0 0 40% 40%;
+    xxborder: 1px solid #c30;
+    transition: all linear var(--runtime), height linear var(--heighttime);
     box-sizing: border-box;
     width: calc(100% - 4px);
     height: 20px;
@@ -170,10 +180,16 @@ input[type=range]:focus {
 }
 
 .band-start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     transition: all linear 0s;
-    width: calc(100% - 2px);
+    width: calc(100% - 4px);
     box-sizing: border-box;
+    line-height: 0px;
+    padding: 0px;
+    opacity: 0;
     height: 0px;
     top: 0px;
 }
@@ -182,8 +198,38 @@ input[type=range]:focus {
     position: absolute;
     border-radius: 2px;
 	background-color: var(--dnacolor2);
-    width: calc(100% - 2px);
+    width: calc(100% - 4px);
+    transition: all linear var(--runtime);
+}
+
+</style>
+<style>
+svg {
+    height: 100%;
+    width: 100%;
+}
+
+.svgBandHolder {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    width: 100%;
+    height: 20px;
+    xxxbackground-color: #ea0;
+    xxxborder: 1px solid #c30;
     transition: all linear 0.5s;
+    filter: blur(1px);
+    
+}
+
+.bandX {
+    transition:
+        all linear var(--runtime),
+        height linear var(--heighttime);
+    xd : path('M0 0C.12 .5 .25 .1 .4 .2C.75 0 .88 .5 1 0  C 1.04 1.35 .75 .85 .7 .85 C .25 .85 -.04 1.35 0 0 Z');
+    d : path('M0 0C12 50 25 10 40 20C75 0 88 50 100 0  C 104 135 75 85 70 85C25 85 -4 135 0 0 Z');
+    fill : var(--dnacolor2);
 }
 
 </style>
@@ -191,17 +237,16 @@ input[type=range]:focus {
 
 <body>
 <div id="holder">
-    <div class="center"> gel plated </div>
     
-    <div id="gelspace">
-        <div id="gel0" class="gel"></div>
-        <div class="gel"></div>
-        <div class="gel"></div>
-    </div>
+    <div class="center"> gel plaited </div>
+    
+    <div id="gelspace"><div class="gel">lad</div></div>
     
     <div style="text-align:right;width:100%">
         <i>~queviva</i>
     </div>
+
+</div>
     
 </div>
 </body>
@@ -212,39 +257,76 @@ new(function() {
 
     // set preferences {
     const prefs = {
-        numBands: 5,
+        numGels: 3,
+        numBands: 3,
         err: {
             h: 2, // height of band
             t: 1, // top coord of band
             o: 0.05, // opacity of band
-            smear: 100 // 1-in-# bands that smear
+            smear: 10 // 1-in-# bands that smear
         }
     };
     //}
 
     // get references {
-    const gels = document.querySelectorAll('#gelspace > .gel');
+    let doc = window.getComputedStyle(document.documentElement);
+    
+    const gelSpace = document.getElementById('gelspace');
+    const gelSize = {
+        H : parseInt(doc.getPropertyValue('--gelheight'),10),
+        W : 0
+    };
 
     const gelH = parseInt(
-        window.getComputedStyle(document.documentElement)
-        .getPropertyValue('--gelheight'),
-        10
+        doc.getPropertyValue('--gelheight'),10
     );
+    
+    const gels = [];
     //}
-
+    
+    // create the gels {
+    for (let i = 0; i < prefs.numGels; i++) {
+        
+        let tmpDiv = document.createElement('div');
+        tmpDiv.classList.add('gel');
+        gels[i] = tmpDiv;
+        gelspace.appendChild(tmpDiv);
+        
+    }
+        
+    //}
+    
     // create the bands {
     gels.forEach(gel => {
 
         let bands = []; //[...Array(prefs.numBand).keys()];
 
         for (let i = 0; i < prefs.numBands; i++) {
-
+        
             let tmpDiv = document.createElement('div');
-            tmpDiv.className = 'band';
-            bands[i] = tmpDiv;
-            gel.appendChild(bands[i]);
-
+            tmpDiv.className = 'bandZ';
+            //bands[i] = tmpDiv;
+        
+            // use NS for creation
+            let tmpSvg = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'svg'
+            );
+            tmpSvg.classList.add('svgBandHolder');
+            //tmpSvg.classList.add('band');
+            tmpSvg.setAttribute('preserveAspectRatio','none');
+            tmpSvg.setAttribute('viewBox','0 0 100 100');
+            tmpSvg.setAttribute('style','width:100%;height:100%');
+            
+            tmpP = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'path'
+            );
+            tmpP.classList.add('bandX');
+            tmpSvg.appendChild(tmpP);
+            tmpDiv.appendChild(tmpSvg)
+            gel.appendChild(tmpDiv);
+            
         }
+        
 
         gel.addEventListener('click', e => reset());
 
@@ -257,13 +339,13 @@ new(function() {
         // holder for the values
         let vals = { h: [], t: [], o: [] };
 
-        // loop through all the children
+        // loop through all bands of one gel
         for (ban of gels[0].children) {
 
             // generate random vals
             let h = 2 + Math.random() * 22;
             vals.h.push(h);
-            vals.t.push(Math.random() * (gelH - h)); + 'px';
+            vals.t.push(Math.random() * (gelSize.H - h)); + 'px';
             vals.o.push(Math.random() + 0.05);
 
         }
@@ -288,9 +370,9 @@ new(function() {
                         ban.style, {
                             height: gelH * 0.98 + 'px',
                             top: Math.random() * 10 + 'px',
-                            opacity: Math.random() * 0.2
+                            opacity: Math.random() * 0.2,
                         }
-                    )
+                    );
 
                 }
                 //}
@@ -342,7 +424,7 @@ new(function() {
                     ban.style, {
                         height: '0px',
                         top: '0px',
-                        opacity: 0.1
+                        opacity: 0
                     }
                 );
 
